@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Bubbles Interactive</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      --neutral-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      --dark-bg: #0f0f23;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.8);
+      --shadow-primary: 0 8px 32px rgba(31, 38, 135, 0.37);
+      --shadow-hover: 0 12px 40px rgba(31, 38, 135, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--dark-bg);
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 198, 255, 0.3) 0%, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      backdrop-filter: blur(16px);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: var(--shadow-primary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, #a8edea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    .game-area {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    canvas {
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 20px 40px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      cursor: crosshair;
+    }
+
+    canvas:hover {
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 25px 50px rgba(0, 0, 0, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 50px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: var(--success-gradient);
+      color: white;
+      box-shadow: 0 4px 16px rgba(79, 172, 254, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(79, 172, 254, 0.6);
+    }
+
+    .btn-secondary {
+      background: var(--secondary-gradient);
+      color: white;
+      box-shadow: 0 4px 16px rgba(240, 147, 251, 0.4);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(240, 147, 251, 0.6);
+    }
+
+    .btn-warning {
+      background: var(--warning-gradient);
+      color: white;
+      box-shadow: 0 4px 16px rgba(67, 233, 123, 0.4);
+    }
+
+    .btn-warning:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(67, 233, 123, 0.6);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 16px 24px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      min-width: 120px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+      50% { transform: translateY(-20px) rotate(180deg); opacity: 0.5; }
+    }
+
+    @keyframes ripple {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.6);
+      pointer-events: none;
+      animation: ripple 0.6s linear;
+    }
+
+    @media (max-width: 768px) {
+      .app-container {
+        padding: 24px;
+        margin: 10px;
+      }
+      
+      .title {
+        font-size: 2rem;
+      }
+      
+      canvas {
+        max-width: 100%;
+        height: auto;
+      }
+      
+      .controls {
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 200px;
+      }
+      
+      .stats {
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <h1 class="title">Premium Bubbles</h1>
+      <p class="subtitle">Click the bubbles to shoot arrows • Interactive Gaming Experience</p>
+    </div>
+
+    <div class="game-area">
+      <canvas id="gameCanvas" width="1000" height="500"></canvas>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" onclick="resetGame()">Reset Game</button>
+      <button class="btn btn-secondary" onclick="toggleAutoPlay()">Auto Play</button>
+      <button class="btn btn-warning" onclick="addBubble()">Add Bubble</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-value" id="hitCount">0</div>
+        <div class="stat-label">Hits</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="missCount">0</div>
+        <div class="stat-label">Misses</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="accuracy">0%</div>
+        <div class="stat-label">Accuracy</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    class PremiumBubblesGame {
+      constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.hitCount = 0;
+        this.missCount = 0;
+        this.isAutoPlay = false;
+        this.autoPlayInterval = null;
+        
+        this.gradients = [
+          ['#667eea', '#764ba2'],
+          ['#f093fb', '#f5576c'],
+          ['#4facfe', '#00f2fe'],
+          ['#43e97b', '#38f9d7'],
+          ['#fa709a', '#fee140'],
+          ['#a8edea', '#fed6e3']
+        ];
+        
+        this.bubbles = [
+          { x: 180, y: 100, radius: 35, gradientIndex: 0, isHit: false, originalX: 180, originalY: 100 },
+          { x: 180, y: 200, radius: 35, gradientIndex: 1, isHit: false, originalX: 180, originalY: 200 },
+          { x: 180, y: 300, radius: 35, gradientIndex: 2, isHit: false, originalX: 180, originalY: 300 },
+          { x: 180, y: 400, radius: 35, gradientIndex: 3, isHit: false, originalX: 180, originalY: 400 }
+        ];
+
+        this.arrows = this.bubbles.map(bubble => ({
+          x: 820,
+          y: bubble.y,
+          targetX: bubble.x + bubble.radius + 10,
+          originalX: 820,
+          speed: 6,
+          active: false,
+          trail: []
+        }));
+
+        this.particles = [];
+        this.setupEventListeners();
+        this.render();
+      }
+
+      createGradient(x, y, radius, gradientIndex) {
+        const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, radius);
+        const colors = this.gradients[gradientIndex];
+        gradient.addColorStop(0, colors[0]);
+        gradient.addColorStop(1, colors[1]);
+        return gradient;
+      }
+
+      drawBubble(bubble) {
+        const { x, y, radius, gradientIndex, isHit } = bubble;
+        
+        // Glow effect
+        this.ctx.shadowColor = isHit ? '#666' : this.gradients[gradientIndex][1];
+        this.ctx.shadowBlur = isHit ? 5 : 20;
+        
+        // Main bubble
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+        this.ctx.fillStyle = isHit ? '#444' : this.createGradient(x, y, radius, gradientIndex);
+        this.ctx.fill();
+        
+        // Inner highlight
+        if (!isHit) {
+          this.ctx.beginPath();
+          this.ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.4, 0, Math.PI * 2);
+          const highlightGradient = this.ctx.createRadialGradient(
+            x - radius * 0.3, y - radius * 0.3, 0,
+            x - radius * 0.3, y - radius * 0.3, radius * 0.4
+          );
+          highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+          highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          this.ctx.fillStyle = highlightGradient;
+          this.ctx.fill();
+        }
+        
+        // Border
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+        this.ctx.strokeStyle = isHit ? '#333' : 'rgba(255, 255, 255, 0.3)';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        this.ctx.shadowBlur = 0;
+      }
+
+      drawArrow(arrow) {
+        const { x, y, trail } = arrow;
+        
+        // Draw trail
+        trail.forEach((point, index) => {
+          const alpha = (index + 1) / trail.length * 0.5;
+          this.ctx.globalAlpha = alpha;
+          this.ctx.beginPath();
+          this.ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
+          this.ctx.fillStyle = '#4facfe';
+          this.ctx.fill();
+        });
+        this.ctx.globalAlpha = 1;
+        
+        // Arrow shadow
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.shadowBlur = 10;
+        
+        // Arrow body
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y);
+        this.ctx.lineTo(x - 25, y - 12);
+        this.ctx.lineTo(x - 25, y - 6);
+        this.ctx.lineTo(x - 50, y - 6);
+        this.ctx.lineTo(x - 50, y + 6);
+        this.ctx.lineTo(x - 25, y + 6);
+        this.ctx.lineTo(x - 25, y + 12);
+        this.ctx.closePath();
+        
+        const arrowGradient = this.ctx.createLinearGradient(x - 50, y, x, y);
+        arrowGradient.addColorStop(0, '#4facfe');
+        arrowGradient.addColorStop(1, '#00f2fe');
+        this.ctx.fillStyle = arrowGradient;
+        this.ctx.fill();
+        
+        // Arrow highlight
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y);
+        this.ctx.lineTo(x - 25, y - 12);
+        this.ctx.lineTo(x - 25, y - 6);
+        this.ctx.lineTo(x - 50, y - 6);
+        this.ctx.lineTo(x - 50, y - 2);
+        this.ctx.lineTo(x - 25, y - 2);
+        this.ctx.lineTo(x - 25, y - 8);
+        this.ctx.closePath();
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.fill();
+        
+        this.ctx.shadowBlur = 0;
+      }
+
+      createParticles(x, y, color) {
+        for (let i = 0; i < 15; i++) {
+          this.particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10,
+            color: color,
+            life: 1,
+            decay: 0.02 + Math.random() * 0.02
+          });
+        }
+      }
+
+      updateParticles() {
+        this.particles = this.particles.filter(particle => {
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          particle.vy += 0.2; // gravity
+          particle.life -= particle.decay;
+          
+          if (particle.life > 0) {
+            this.ctx.globalAlpha = particle.life;
+            this.ctx.beginPath();
+            this.ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+            this.ctx.fillStyle = particle.color;
+            this.ctx.fill();
+            this.ctx.globalAlpha = 1;
+            return true;
+          }
+          return false;
+        });
+      }
+
+      animateArrows() {
+        let stillMoving = false;
+        
+        this.arrows.forEach((arrow, i) => {
+          if (arrow.active) {
+            // Add to trail
+            arrow.trail.push({ x: arrow.x, y: arrow.y });
+            if (arrow.trail.length > 10) arrow.trail.shift();
+            
+            if (arrow.x > this.bubbles[i].x + this.bubbles[i].radius + 10) {
+              arrow.x -= arrow.speed;
+              stillMoving = true;
+            } else if (!this.bubbles[i].isHit) {
+              // Hit the bubble
+              arrow.active = false;
+              this.bubbles[i].isHit = true;
+              this.hitCount++;
+              this.createParticles(
+                this.bubbles[i].x, 
+                this.bubbles[i].y, 
+                this.gradients[this.bubbles[i].gradientIndex][1]
+              );
+              this.createRipple(this.bubbles[i].x, this.bubbles[i].y);
+              this.updateStats();
+            }
+          }
+        });
+        
+        this.render();
+        if (stillMoving) requestAnimationFrame(() => this.animateArrows());
+      }
+
+      createRipple(x, y) {
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple';
+        ripple.style.left = (x - 10) + 'px';
+        ripple.style.top = (y - 10) + 'px';
+        ripple.style.width = '20px';
+        ripple.style.height = '20px';
+        ripple.style.position = 'absolute';
+        this.canvas.parentElement.appendChild(ripple);
+        
+        setTimeout(() => {
+          ripple.remove();
+        }, 600);
+      }
+
+      handleClick(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        this.bubbles.forEach((bubble, i) => {
+          const dx = x - bubble.x;
+          const dy = y - bubble.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance <= bubble.radius) {
+            if (!bubble.isHit) {
+              // Shoot arrow
+              this.arrows[i].active = true;
+              this.arrows[i].trail = [];
+              this.animateArrows();
+            } else {
+              // Reset bubble and arrow
+              bubble.isHit = false;
+              this.arrows[i].x = this.arrows[i].originalX;
+              this.arrows[i].active = false;
+              this.arrows[i].trail = [];
+            }
+          } else {
+            // Missed click
+            this.missCount++;
+            this.updateStats();
+          }
+        });
+      }
+
+      setupEventListeners() {
+        this.canvas.addEventListener('click', (e) => this.handleClick(e));
+        
+        this.canvas.addEventListener('mousemove', (e) => {
+          const rect = this.canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          let isOverBubble = false;
+          this.bubbles.forEach(bubble => {
+            const dx = x - bubble.x;
+            const dy = y - bubble.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance <= bubble.radius) {
+              isOverBubble = true;
+            }
+          });
+          
+          this.canvas.style.cursor = isOverBubble ? 'pointer' : 'crosshair';
+        });
+      }
+
+      render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Background effects
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.bubbles.forEach(bubble => this.drawBubble(bubble));
+        this.arrows.forEach(arrow => this.drawArrow(arrow));
+        this.updateParticles();
+      }
+
+      updateStats() {
+        document.getElementById('hitCount').textContent = this.hitCount;
+        document.getElementById('missCount').textContent = this.missCount;
+        const total = this.hitCount + this.missCount;
+        const accuracy = total > 0 ? Math.round((this.hitCount / total) * 100) : 0;
+        document.getElementById('accuracy').textContent = accuracy + '%';
+      }
+
+      reset() {
+        this.bubbles.forEach((bubble, i) => {
+          bubble.isHit = false;
+          bubble.x = bubble.originalX;
+          bubble.y = bubble.originalY;
+          this.arrows[i].x = this.arrows[i].originalX;
+          this.arrows[i].active = false;
+          this.arrows[i].trail = [];
+        });
+        this.particles = [];
+        this.hitCount = 0;
+        this.missCount = 0;
+        this.updateStats();
+        this.render();
+      }
+
+      toggleAutoPlay() {
+        this.isAutoPlay = !this.isAutoPlay;
+        const btn = document.querySelector('.btn-secondary');
+        
+        if (this.isAutoPlay) {
+          btn.textContent = 'Stop Auto';
+          this.autoPlayInterval = setInterval(() => {
+            const availableBubbles = this.bubbles.filter(bubble => !bubble.isHit);
+            if (availableBubbles.length > 0) {
+              const randomBubble = availableBubbles[Math.floor(Math.random() * availableBubbles.length)];
+              const index = this.bubbles.indexOf(randomBubble);
+              this.arrows[index].active = true;
+              this.arrows[index].trail = [];
+              this.animateArrows();
+            }
+          }, 2000);
+        } else {
+          btn.textContent = 'Auto Play';
+          clearInterval(this.autoPlayInterval);
+        }
+      }
+
+      addBubble() {
+        if (this.bubbles.length < 8) {
+          const newY = 100 + (this.bubbles.length * 60);
+          const newBubble = {
+            x: 180,
+            y: newY,
+            radius: 35,
+            gradientIndex: this.bubbles.length % this.gradients.length,
+            isHit: false,
+            originalX: 180,
+            originalY: newY
+          };
+          
+          const newArrow = {
+            x: 820,
+            y: newY,
+            targetX: 180 + 35 + 10,
+            originalX: 820,
+            speed: 6,
+            active: false,
+            trail: []
+          };
+          
+          this.bubbles.push(newBubble);
+          this.arrows.push(newArrow);
+          this.canvas.height = Math.max(500, newY + 100);
+          this.render();
+        }
+      }
+    }
+
+    // Initialize the game
+    const game = new PremiumBubblesGame();
+
+    // Global functions for buttons
+    function resetGame() {
+      game.reset();
+    }
+
+    function toggleAutoPlay() {
+      game.toggleAutoPlay();
+    }
+
+    function addBubble() {
+      game.addBubble();
+    }
+
+    // Add some floating particles in the background
+    function createBackgroundParticles() {
+      const container = document.querySelector('.app-container');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.width = Math.random() * 4 + 2 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.background = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.1)`;
+        particle.style.animationDelay = Math.random() * 3 + 's';
+        particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    createBackgroundParticles();
+  </script>
+</body>
+</html>
