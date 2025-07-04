@@ -21,14 +21,6 @@
 - CSS3
 - JavaScript (Vanilla)
 
----
-
-## 📸 Preview
-
-![Game Screenshot](./path-to-your-screenshot.png) <!-- Replace with actual image path if uploading -->
-
----
-
 ## 📥 How to Run the Project
 
 1. Clone the repository:
